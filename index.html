@@ -16,6 +16,7 @@
                         {}, // attributes to set on the component
                         'lightning-out', // DOM element ID where the component is inserted
                         function (cmp) { // callback after the component loads
+                            console.log('cmp=>', cmp);
                             console.log('The component was created.');
                         }
                     );
