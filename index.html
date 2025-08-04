@@ -1,8 +1,10 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Salesforce Lightning Out Login</title>
 </head>
 
 <body>
@@ -15,66 +17,85 @@
         src="https://enterprise-enterprise-933-dev-ed.scratch.lightning.force.com/lightning/lightning.out.js"></script>
 
     <script>
-        // Function to initiate Salesforce OAuth login flow in a popup window
-        function login() {
-            const clientId = '3MVG9D6vJTURvMyt9v8YKcPm7B8TA3vfliZucH9_lTy9bpf2vxJVdHRF8z1dKHE62m6ffhBXxrGzh6OPlETod';
-            const salesforceDomain = 'https://enterprise-enterprise-933-dev-ed.scratch.lightning.force.com'; // Salesforce org domain
-            // const redirectUri = window.location.origin + window.location.pathname; // Current page URL as redirect URI
-            const redirectUri = 'https://iamroyanirban.github.io'
+        // Define constants for client ID, redirect URI, and Salesforce domain
+        const CLIENT_ID = '3MVG9D6vJTURvMyt9v8YKcPm7B8TA3vfliZucH9_lTy9bpf2vxJVdHRF8z1dKHE62m6ffhBXxrGzh6OPlETod';
+        const REDIRECT_URI = 'https://test.salesforce.com/services/oauth2/success'; // Your custom redirect page
+        const SALESFORCE_DOMAIN = 'https://test.salesforce.com/services/oauth2/success';
 
-            // Construct the OAuth 2.0 authorization URL with required parameters
+        // Function to start the OAuth login popup and handle the polling for access token
+        function login() {
+            // Construct the OAuth authorization URL
             const oauthUrl =
                 `https://test.salesforce.com/services/oauth2/authorize` +
-                `?response_type=token` + // requesting access token directly
-                `&client_id=${encodeURIComponent(clientId)}` +
-                `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+                `?response_type=token` +  // Request access token directly
+                `&client_id=${encodeURIComponent(CLIENT_ID)}` +
+                `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
                 `&scope=full%20refresh_token`; // OAuth scopes
 
-            console.log('final oauth URL', oauthUrl);
+            // Open the login popup window
+            const oauthPopup = window.open(oauthUrl, 'salesforceLogin', 'width=600,height=700');
 
-            // Open the OAuth login page in a new popup window
-            const popup = window.open(
-                oauthUrl,
-                "salesforceLogin",
-                "width=600,height=700,scrollbars=yes,resizable=yes"
-            );
-
-            // Non-popup login flow
-            // Uncomment below line to redirect current page instead of popup
-            // window.location = oauthUrl;
-        }
-
-        // Helper function to extract the access token from the URL hash fragment
-        function getAccessTokenFromUrl() {
-            const hash = window.location.hash.substring(1); // remove '#' from URL hash
-            const params = new URLSearchParams(hash);
-            return params.get('access_token'); // return the access token if present
-        }
-
-        // On page load, check if access token is available in URL
-        window.onload = function () {
-            const accessToken = getAccessTokenFromUrl();
-            if (accessToken) {
-                // Use Lightning Out to load and initialize your Aura component with the access token
-                $Lightning.use(
-                    "c:aicExternalApp",  // top-level Aura app containing your components
-                    {},                  // attributes to set on the app component
-                    function () {        // callback once framework and app load completed
-                        $Lightning.createComponent(
-                            "c:aicWidgetApp",    // component to create
-                            {},                  // attributes for component
-                            "aic_lightning_app", // DOM element ID where component is inserted
-                            function () {
-                                console.log("LWC loaded."); // confirm successful component load
-                            }
-                        );
-                    },
-                    salesforceDomain,      // Salesforce org domain
-                    accessToken            // OAuth access token for authentication
-                );
+            // Check if popup was blocked by the browser
+            if (!oauthPopup) {
+                alert('Popup blocked! Please allow popups for this site.');
+                return;
             }
-        };
+
+            // Polling interval to check the popup URL for access token presence
+            const pollingInterval = setInterval(() => {
+                try {
+                    // If popup is closed prematurely, clear polling and handle if needed
+                    if (!oauthPopup || oauthPopup.closed) {
+                        clearInterval(pollingInterval);
+                        console.log('Popup closed before authentication.');
+                        // Optional: notify user or update UI here
+                        return;
+                    }
+
+                    // Check if the popup has navigated to your redirect URI and contains an access token in the URL hash
+                    if (oauthPopup.location.href.startsWith(REDIRECT_URI) && oauthPopup.location.hash) {
+                        // Extract the access token from the URL hash fragment
+                        const hash = oauthPopup.location.hash.substring(1);
+                        const params = new URLSearchParams(hash);
+                        const accessToken = params.get('access_token');
+
+                        if (accessToken) {
+                            // Access token found, clear polling and close the popup
+                            clearInterval(pollingInterval);
+                            oauthPopup.close();
+
+                            // Initialize Lightning Out with the access token
+                            initializeLightningOut(accessToken);
+                        }
+                    }
+                }
+                catch (error) {
+                    // Cross-origin error will happen until popup navigates to redirect URI in the same origin
+                    // Ignore the error and keep polling until it succeeds
+                }
+            }, 500);
+        }
+
+        // Function to initialize Lightning Out with the provided OAuth access token
+        function initializeLightningOut(accessToken) {
+            $Lightning.use(
+                'c:aicExternalApp',       // Aura app name containing your Lightning components
+                {},                       // Attributes for the app component if any
+                function () {
+                    // Create the Lightning component inside the div with id 'aic_lightning_app'
+                    $Lightning.createComponent(
+                        'c:aicWidgetApp',     // Your Lightning component name
+                        {},
+                        'aic_lightning_app',
+                        function () {
+                            console.log('Lightning component loaded with token.');
+                        }
+                    );
+                },
+                SALESFORCE_DOMAIN,
+                accessToken               // Pass OAuth token for authentication
+            );
+        }
     </script>
 </body>
-
 </html>
