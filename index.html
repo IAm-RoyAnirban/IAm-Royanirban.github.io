@@ -1,4 +1,5 @@
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -20,7 +21,7 @@
             const salesforceDomain = 'https://enterprise-enterprise-933-dev-ed.scratch.lightning.force.com'; // Salesforce org domain
             // const redirectUri = window.location.origin + window.location.pathname; // Current page URL as redirect URI
             const redirectUri = 'https://iamroyanirban.github.io/'
-            
+
             // Construct the OAuth 2.0 authorization URL with required parameters
             const oauthUrl =
                 `https://test.salesforce.com/services/oauth2/authorize` +
@@ -37,8 +38,6 @@
                 "salesforceLogin",
                 "width=600,height=700,scrollbars=yes,resizable=yes"
             );
-
-            
 
             // Non-popup login flow
             // Uncomment below line to redirect current page instead of popup
@@ -77,4 +76,5 @@
         };
     </script>
 </body>
+
 </html>
