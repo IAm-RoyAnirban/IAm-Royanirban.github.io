@@ -20,8 +20,6 @@
             const salesforceDomain = 'https://enterprise-enterprise-933-dev-ed.scratch.lightning.force.com'; // Salesforce org domain
             const redirectUri = window.location.origin + window.location.pathname; // Current page URL as redirect URI
 
-            console.log('redirectURI', redirectUri);
-
             // Construct the OAuth 2.0 authorization URL with required parameters
             const oauthUrl =
                 `https://test.salesforce.com/services/oauth2/authorize` +
@@ -29,6 +27,8 @@
                 `&client_id=${encodeURIComponent(clientId)}` +
                 `&redirect_uri=${encodeURIComponent(redirectUri)}` +
                 `&scope=full%20refresh_token%20offline_access`; // OAuth scopes
+
+            console.log('final oauth URL', oauthUrl);
 
             // Open the OAuth login page in a new popup window
             window.open(
