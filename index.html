@@ -28,7 +28,7 @@
                 `?response_type=token` + // requesting access token directly
                 `&client_id=${encodeURIComponent(clientId)}` +
                 `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-                `&scope=full%20api%20refresh_token%20offline_access`; // OAuth scopes
+                `&scope=full%20offline_access%20einstein_gpt_api`; // OAuth scopes
 
             // Open the OAuth login page in a new popup window
             window.open(
