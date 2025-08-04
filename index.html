@@ -18,8 +18,8 @@
         function login() {
             const clientId = '3MVG9D6vJTURvMyt9v8YKcPm7B8TA3vfliZucH9_lTy9bpf2vxJVdHRF8z1dKHE62m6ffhBXxrGzh6OPlETod';
             const salesforceDomain = 'https://enterprise-enterprise-933-dev-ed.scratch.lightning.force.com'; // Salesforce org domain
-            //const redirectUri = window.location.origin + window.location.pathname; // Current page URL as redirect URI
-            const redirectUri = 'https://test.salesforce.com/services/oauth2/success'
+            // const redirectUri = window.location.origin + window.location.pathname; // Current page URL as redirect URI
+            const redirectUri = 'https://iamroyanirban.github.io/'
             
             // Construct the OAuth 2.0 authorization URL with required parameters
             const oauthUrl =
@@ -32,11 +32,13 @@
             console.log('final oauth URL', oauthUrl);
 
             // Open the OAuth login page in a new popup window
-            window.open(
+            const popup = window.open(
                 oauthUrl,
                 "salesforceLogin",
                 "width=600,height=700,scrollbars=yes,resizable=yes"
             );
+
+            
 
             // Non-popup login flow
             // Uncomment below line to redirect current page instead of popup
