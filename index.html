@@ -17,66 +17,42 @@
         src="https://enterprise-enterprise-933-dev-ed.scratch.lightning.force.com/lightning/lightning.out.js"></script>
 
     <script>
-        // Define constants for client ID, redirect URI, and Salesforce domain
+        // Define constants for client ID, redirect URI (must be a page you control), and Salesforce domain
         const CLIENT_ID = '3MVG9D6vJTURvMyt9v8YKcPm7B8TA3vfliZucH9_lTy9bpf2vxJVdHRF8z1dKHE62m6ffhBXxrGzh6OPlETod';
-        const REDIRECT_URI = 'https://test.salesforce.com/services/oauth2/success'; // Your custom redirect page
-        const SALESFORCE_DOMAIN = 'https://test.salesforce.com/services/oauth2/success';
+        const REDIRECT_URI = window.location.origin + window.location.pathname; // This page itself
+        const SALESFORCE_DOMAIN = 'https://enterprise-enterprise-933-dev-ed.scratch.lightning.force.com';
 
-        // Function to start the OAuth login popup and handle the polling for access token
+        // On page load, check if we've been redirected back with an access token from Salesforce
+        window.onload = function () {
+            // Access token will be in the URL hash fragment if OAuth succeeded
+            if (window.location.hash) {
+                const hash = window.location.hash.substring(1);
+                const params = new URLSearchParams(hash);
+                const accessToken = params.get('access_token');
+                if (accessToken) {
+                    // Clean up the URL for UX
+                    history.replaceState({}, document.title, window.location.pathname);
+
+                    // Automatically initialize Lightning Out
+                    initializeLightningOut(accessToken);
+                }
+            }
+        }
+
         function login() {
-            // Construct the OAuth authorization URL
+            // Build the Salesforce OAuth authorization URL
             const oauthUrl =
                 `https://test.salesforce.com/services/oauth2/authorize` +
                 `?response_type=token` +  // Request access token directly
                 `&client_id=${encodeURIComponent(CLIENT_ID)}` +
                 `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
-                `&scope=full%20refresh_token`; // OAuth scopes
+                `&scope=full%20refresh_token`;
 
-            // Open the login popup window
-            const oauthPopup = window.open(oauthUrl, 'salesforceLogin', 'width=600,height=700');
-
-            // Check if popup was blocked by the browser
-            if (!oauthPopup) {
-                alert('Popup blocked! Please allow popups for this site.');
-                return;
-            }
-
-            // Polling interval to check the popup URL for access token presence
-            const pollingInterval = setInterval(() => {
-                try {
-                    // If popup is closed prematurely, clear polling and handle if needed
-                    if (!oauthPopup || oauthPopup.closed) {
-                        clearInterval(pollingInterval);
-                        console.log('Popup closed before authentication.');
-                        // Optional: notify user or update UI here
-                        return;
-                    }
-
-                    // Check if the popup has navigated to your redirect URI and contains an access token in the URL hash
-                    if (oauthPopup.location.href.startsWith(REDIRECT_URI) && oauthPopup.location.hash) {
-                        // Extract the access token from the URL hash fragment
-                        const hash = oauthPopup.location.hash.substring(1);
-                        const params = new URLSearchParams(hash);
-                        const accessToken = params.get('access_token');
-
-                        if (accessToken) {
-                            // Access token found, clear polling and close the popup
-                            clearInterval(pollingInterval);
-                            oauthPopup.close();
-
-                            // Initialize Lightning Out with the access token
-                            initializeLightningOut(accessToken);
-                        }
-                    }
-                }
-                catch (error) {
-                    // Cross-origin error will happen until popup navigates to redirect URI in the same origin
-                    // Ignore the error and keep polling until it succeeds
-                }
-            }, 500);
+            // Redirect the browser for authentication
+            window.location = oauthUrl;
         }
 
-        // Function to initialize Lightning Out with the provided OAuth access token
+        // Function to initialize Lightning Out with the received access token
         function initializeLightningOut(accessToken) {
             $Lightning.use(
                 'c:aicExternalApp',       // Aura app name containing your Lightning components
@@ -98,4 +74,5 @@
         }
     </script>
 </body>
+
 </html>
