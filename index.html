@@ -1,28 +1,75 @@
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-    </head>
-    <body>
-        <h1>My External Page</h1>
-        <div id="lightning-out"></div>
-        <script src="https://speed-speed-9076-dev-ed.scratch.my.salesforce-sites.com/lightning/lightning.out.js"></script>
-        <script>
-            $Lightning.use(
-                'c:MyAuraApp', // name of the Lightning Out app
-                function () { // callback after the framework and app load
-                    $Lightning.createComponent(
-                        'c:aicWidgetApp', // top-level component of the Lightning Out app
-                        {}, // attributes to set on the component
-                        'lightning-out', // DOM element ID where the component is inserted
-                        function (cmp) { // callback after the component loads
-                            // console.log('cmp=>', cmp);
-                            console.log('The component was created.');
-                        }
-                    );
-                },
-                'https://speed-speed-9076-dev-ed.scratch.my.salesforce-sites.com' // Experience Cloud site endpoint
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+
+<body>
+    <h1>My External Page</h1>
+    <button onclick="login()">Login with Salesforce</button>
+    <div id="aic_lightning_app"></div>
+
+    <!-- Load Lightning Out JavaScript -->
+    <script
+        src="https://enterprise-enterprise-933-dev-ed.scratch.lightning.force.com/lightning/lightning.out.js"></script>
+
+    <script>
+        // Function to initiate Salesforce OAuth login flow in a popup window
+        function login() {
+            const clientId = '3MVG9D6vJTURvMyt9v8YKcPm7B8TA3vfliZucH9_lTy9bpf2vxJVdHRF8z1dKHE62m6ffhBXxrGzh6OPlETod';
+            const salesforceDomain = 'https://enterprise-enterprise-933-dev-ed.scratch.lightning.force.com'; // Salesforce org domain
+            const redirectUri = window.location.origin + window.location.pathname; // Current page URL as redirect URI
+
+            // Construct the OAuth 2.0 authorization URL with required parameters
+            const oauthUrl =
+                `https://test.salesforce.com/services/oauth2/authorize` +
+                `?response_type=token` + // requesting access token directly
+                `&client_id=${encodeURIComponent(clientId)}` +
+                `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+                `&scope=full%20api%20refresh_token%20offline_access`; // OAuth scopes
+
+            // Open the OAuth login page in a new popup window
+            window.open(
+                oauthUrl,
+                "salesforceLogin",
+                "width=600,height=700,scrollbars=yes,resizable=yes"
             );
-        </script>
-    </body>
+
+            // Non-popup login flow
+            // Uncomment below line to redirect current page instead of popup
+            // window.location = oauthUrl;
+        }
+
+        // Helper function to extract the access token from the URL hash fragment
+        function getAccessTokenFromUrl() {
+            const hash = window.location.hash.substring(1); // remove '#' from URL hash
+            const params = new URLSearchParams(hash);
+            return params.get('access_token'); // return the access token if present
+        }
+
+        // On page load, check if access token is available in URL
+        window.onload = function () {
+            const accessToken = getAccessTokenFromUrl();
+            if (accessToken) {
+                // Use Lightning Out to load and initialize your Aura component with the access token
+                $Lightning.use(
+                    "c:aicExternalApp",  // top-level Aura app containing your components
+                    {},                  // attributes to set on the app component
+                    function () {        // callback once framework and app load completed
+                        $Lightning.createComponent(
+                            "c:aicWidgetApp",    // component to create
+                            {},                  // attributes for component
+                            "aic_lightning_app", // DOM element ID where component is inserted
+                            function () {
+                                console.log("LWC loaded."); // confirm successful component load
+                            }
+                        );
+                    },
+                    salesforceDomain,      // Salesforce org domain
+                    accessToken            // OAuth access token for authentication
+                );
+            }
+        };
+    </script>
+</body>
 </html>
