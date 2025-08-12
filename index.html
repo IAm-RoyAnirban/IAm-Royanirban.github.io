@@ -27,7 +27,7 @@
     <script>
         const CLIENT_ID = '3MVG9D6vJTURvMyt9v8YKcPm7B8TA3vfliZucH9_lTy9bpf2vxJVdHRF8z1dKHE62m6ffhBXxrGzh6OPlETod';
         const REDIRECT_URI = window.location.origin + '/oauthcallback.html'; // Redirect URI page on your domain
-        const SALESFORCE_DOMAIN = 'https://enterprise-enterprise-933-dev-ed.scratch.my.salesforce-sites.com';
+        const SALESFORCE_DOMAIN = 'https://enterprise-enterprise-933-dev-ed.scratch.my.salesforce.com';
 
         // Open popup for OAuth login and listen for access token via postMessage
         function login() {
@@ -67,9 +67,8 @@
         function initializeLightningOut(accessToken) {
             console.log('access token', accessToken);
             $Lightning.use(
-                'c:aicExternalApp',  // Aura app containing your Lightning components
-                {},                  // Empty app attribute object
-                function () {        // Callback after framework & app load
+                'c:aicExternalApp',
+                function () {
                     $Lightning.createComponent(
                         'c:aicWidgetApp',
                         {},
@@ -79,13 +78,11 @@
                         }
                     );
                 },
-                SALESFORCE_DOMAIN,
+                'https://enterprise-enterprise-933-dev-ed.scratch.my.salesforce.com',
                 accessToken
             );
-
         }
     </script>
 
 </body>
-
 </html>
