@@ -57,6 +57,7 @@
 
         // Initialize Lightning Out app with passed access token
         function initializeLightningOut(accessToken) {
+            console.log('access token', oauthUrl);
             $Lightning.use(
                 'c:aicExternalApp', // Aura app containing your Lightning components
                 {},
