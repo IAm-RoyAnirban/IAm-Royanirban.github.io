@@ -1,3 +1,11 @@
+<!--
+  @description       : 
+  @author            : Anirban Roy
+  @group             : 
+  @last modified on  : 08-12-2025
+  @last modified by  : Anirban Roy
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -28,7 +36,7 @@
                 '?response_type=token' +
                 '&client_id=' + encodeURIComponent(CLIENT_ID) +
                 '&redirect_uri=' + encodeURIComponent(REDIRECT_URI) +
-                '&scope=full%20api';
+                '&scope=full%20refresh_token';
 
             console.log('final oauth URL', oauthUrl);
 
@@ -57,7 +65,7 @@
 
         // Initialize Lightning Out app with passed access token
         function initializeLightningOut(accessToken) {
-            console.log('access token', oauthUrl);
+            console.log('access token', accessToken);
             $Lightning.use(
                 'c:aicExternalApp', // Aura app containing your Lightning components
                 {},
