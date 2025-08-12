@@ -1,0 +1,24 @@
+<!-- oauthcallback.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>OAuth Callback</title>
+</head>
+
+<body>
+    <script>
+        // On load, parse access token from URL fragment and post to opener
+        if (window.opener) {
+            const hash = window.location.hash.substring(1); // remove #
+            const params = new URLSearchParams(hash);
+            const accessToken = params.get('access_token');
+            if (accessToken) {
+                window.opener.postMessage({ access_token: accessToken }, window.location.origin);
+                window.close();
+            }
+        }
+    </script>
+</body>
+
+</html>
