@@ -67,23 +67,25 @@
         function initializeLightningOut(accessToken) {
             console.log('access token', accessToken);
             $Lightning.use(
-                'c:aicExternalApp', // Aura app containing your Lightning components
-                {},
-                function () {
+                'c:aicExternalApp',  // Aura app containing your Lightning components
+                {},                  // Empty app attribute object
+                function () {        // Callback after framework & app load
                     $Lightning.createComponent(
                         'c:aicWidgetApp',
                         {},
                         'aic_lightning_app',
-                        function () {
-                            console.log('Lightning component loaded with token.');
+                        function (cmp) {
+                            console.log('The component was created.');
                         }
                     );
                 },
                 SALESFORCE_DOMAIN,
                 accessToken
             );
+
         }
     </script>
-    
+
 </body>
+
 </html>
