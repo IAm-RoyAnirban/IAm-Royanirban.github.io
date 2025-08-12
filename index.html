@@ -17,51 +17,52 @@
         src="https://enterprise-enterprise-933-dev-ed.scratch.lightning.force.com/lightning/lightning.out.js"></script>
 
     <script>
-        // Define constants for client ID, redirect URI (must be a page you control), and Salesforce domain
         const CLIENT_ID = '3MVG9D6vJTURvMyt9v8YKcPm7B8TA3vfliZucH9_lTy9bpf2vxJVdHRF8z1dKHE62m6ffhBXxrGzh6OPlETod';
-        //const REDIRECT_URI = window.location.origin + window.location.pathname; // This page itself
-        const REDIRECT_URI = 'https://test.salesforce.com/services/oauth2/success';
+        const REDIRECT_URI = window.location.origin + '/oauthcallback.html'; // Redirect URI page on your domain
         const SALESFORCE_DOMAIN = 'https://enterprise-enterprise-933-dev-ed.scratch.lightning.force.com';
 
-        // On page load, check if we've been redirected back with an access token from Salesforce
-        window.onload = function () {
-            // Access token will be in the URL hash fragment if OAuth succeeded
-            if (window.location.hash) {
-                const hash = window.location.hash.substring(1);
-                const params = new URLSearchParams(hash);
-                const accessToken = params.get('access_token');
-                if (accessToken) {
-                    // Clean up the URL for UX
-                    history.replaceState({}, document.title, window.location.pathname);
-
-                    // Automatically initialize Lightning Out
-                    initializeLightningOut(accessToken);
-                }
-            }
-        }
-
+        // Open popup for OAuth login and listen for access token via postMessage
         function login() {
-            // Build the Salesforce OAuth authorization URL
             const oauthUrl =
-                `https://test.salesforce.com/services/oauth2/authorize` +
-                `?response_type=token` +  // Request access token directly
-                `&client_id=${encodeURIComponent(CLIENT_ID)}` +
-                `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
-                `&scope=full%20refresh_token`;
+                'https://test.salesforce.com/services/oauth2/authorize' +
+                '?response_type=token' +
+                '&client_id=' + encodeURIComponent(CLIENT_ID) +
+                '&redirect_uri=' + encodeURIComponent(REDIRECT_URI) +
+                '&scope=full%20refresh_token';
 
-            // Redirect the browser for authentication
-            window.location = oauthUrl;
+            console.log('final oauth URL', oauthUrl);
+
+            const width = 500;
+            const height = 600;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+
+            const authWindow = window.open(
+                oauthUrl,
+                'Salesforce Login',
+                `width=${width},height=${height},top=${top},left=${left}`
+            );
+
+            window.addEventListener('message', function (event) {
+                // Security check: only accept message from your domain
+                if (event.origin === window.location.origin) {
+                    const accessToken = event.data.access_token;
+                    if (accessToken) {
+                        initializeLightningOut(accessToken);
+                        authWindow.close();
+                    }
+                }
+            }, false);
         }
 
-        // Function to initialize Lightning Out with the received access token
+        // Initialize Lightning Out app with passed access token
         function initializeLightningOut(accessToken) {
             $Lightning.use(
-                'c:aicExternalApp',       // Aura app name containing your Lightning components
-                {},                       // Attributes for the app component if any
+                'c:aicExternalApp', // Aura app containing your Lightning components
+                {},
                 function () {
-                    // Create the Lightning component inside the div with id 'aic_lightning_app'
                     $Lightning.createComponent(
-                        'c:aicWidgetApp',     // Your Lightning component name
+                        'c:aicWidgetApp',
                         {},
                         'aic_lightning_app',
                         function () {
@@ -70,7 +71,7 @@
                     );
                 },
                 SALESFORCE_DOMAIN,
-                accessToken               // Pass OAuth token for authentication
+                accessToken
             );
         }
     </script>
