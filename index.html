@@ -56,7 +56,7 @@
                 if (event.origin === window.location.origin) {
                     const accessToken = event.data.access_token;
                     if (accessToken) {
-                        initializeLightningOut(accessToken);
+                        initializeLightningOut(accessToken, SALESFORCE_DOMAIN);
                         authWindow.close();
                     }
                 }
@@ -64,8 +64,9 @@
         }
 
         // Initialize Lightning Out app with passed access token
-        function initializeLightningOut(accessToken) {
-            console.log('access token', accessToken);
+        function initializeLightningOut(accessToken, salesforceDomain) {
+            //console.log('access token', accessToken);
+            
             $Lightning.use(
                 'c:aicExternalApp',
                 function () {
@@ -78,8 +79,7 @@
                         }
                     );
                 },
-                'https://enterprise-enterprise-933-dev-ed.scratch.my.salesforce.com',
-                accessToken
+                salesforceDomain, accessToken
             );
         }
     </script>
